@@ -3,7 +3,7 @@ name = "binance-rs"
 version = "0.20.2"
 license = "MIT OR Apache-2.0"
 authors = ["Flavio Oliveira <flavio@wisespace.io>"]
-edition = "2018"
+edition = "2021"
 
 description = "Rust Library for the Binance API"
 keywords = ["cryptocurrency", "trading", "binance"]
@@ -24,7 +24,7 @@ serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0"
 error-chain = { version = "0.12.4", default-features = false }
 reqwest = { version = "0.11.4", features = ["blocking", "json"] }
-tungstenite = { version = "0.18.0", features = ["native-tls"] }
+tungstenite = { version = "0.18.0", features = ["rustls-tls-webpki-roots"] }
 url = "2.2.2"
 
 [features]
