@@ -1,5 +1,5 @@
 [package]
-name = "binance"
+name = "binance-rs"
 version = "0.20.2"
 license = "MIT OR Apache-2.0"
 authors = ["Flavio Oliveira <flavio@wisespace.io>"]
@@ -11,9 +11,6 @@ categories = ["api-bindings", "cryptography::cryptocurrencies"]
 documentation = "https://docs.rs/crate/binance/"
 repository = "https://github.com/wisespace-io/binance-rs"
 readme = "README.md"
-
-[badges]
-travis-ci = { repository = "wisespace-io/binance-rs" }
 
 [lib]
 name = "binance"
@@ -31,10 +28,13 @@ tungstenite = { version = "0.18.0", features = ["native-tls"] }
 url = "2.2.2"
 
 [features]
-vendored-tls = ["reqwest/native-tls-vendored", "tungstenite/native-tls-vendored"]
+vendored-tls = [
+    "reqwest/native-tls-vendored",
+    "tungstenite/native-tls-vendored",
+]
 
 [dev-dependencies]
-csv ="1.1.6"
+csv = "1.1.6"
 mockito = "0.31.0"
 env_logger = "0.9.0"
 criterion = "0.3"
