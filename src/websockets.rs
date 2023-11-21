@@ -1,16 +1,24 @@
 use crate::errors::Result;
 use crate::config::Config;
 use crate::model::{
-    AccountUpdateEvent, AggrTradesEvent, BalanceUpdateEvent, BookTickerEvent, DayTickerEvent,
-    DepthOrderBookEvent, KlineEvent, OrderBook, OrderTradeEvent, TradeEvent,
+    AccountUpdateEvent,
+    AggrTradesEvent,
+    BalanceUpdateEvent,
+    BookTickerEvent,
+    DayTickerEvent,
+    DepthOrderBookEvent,
+    KlineEvent,
+    OrderBook,
+    OrderTradeEvent,
+    TradeEvent,
 };
 use error_chain::bail;
 use url::Url;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{ AtomicBool, Ordering };
 use std::net::TcpStream;
-use tungstenite::{connect, Message};
+use tungstenite::{ connect, Message };
 use tungstenite::protocol::WebSocket;
 use tungstenite::stream::MaybeTlsStream;
 use tungstenite::handshake::client::Response;
@@ -26,10 +34,8 @@ impl WebsocketAPI {
     fn params(self, subscription: &str) -> String {
         match self {
             WebsocketAPI::Default => format!("wss://stream.binance.com:9443/ws/{}", subscription),
-            WebsocketAPI::MultiStream => format!(
-                "wss://stream.binance.com:9443/stream?streams={}",
-                subscription
-            ),
+            WebsocketAPI::MultiStream =>
+                format!("wss://stream.binance.com:9443/stream?streams={}", subscription),
             WebsocketAPI::Custom(url) => format!("{}/{}", url, subscription),
         }
     }
@@ -53,7 +59,7 @@ pub enum WebsocketEvent {
 
 pub struct WebSockets<'a> {
     pub socket: Option<(WebSocket<MaybeTlsStream<TcpStream>>, Response)>,
-    handler: Box<dyn FnMut(WebsocketEvent) -> Result<()> + 'a>,
+    handler: Box<dyn (FnMut(WebsocketEvent) -> Result<()>) + 'a>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -74,8 +80,7 @@ enum Events {
 
 impl<'a> WebSockets<'a> {
     pub fn new<Callback>(handler: Callback) -> WebSockets<'a>
-    where
-        Callback: FnMut(WebsocketEvent) -> Result<()> + 'a,
+        where Callback: FnMut(WebsocketEvent) -> Result<()> + 'a
     {
         WebSockets {
             socket: None,
@@ -148,7 +153,7 @@ impl<'a> WebSockets<'a> {
     pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
         while running.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
-                let message = socket.0.read_message()?;
+                let message = socket.0.read()?;
                 match message {
                     Message::Text(msg) => {
                         if let Err(e) = self.handle_msg(&msg) {
@@ -156,7 +161,7 @@ impl<'a> WebSockets<'a> {
                         }
                     }
                     Message::Ping(_) => {
-                        socket.0.write_message(Message::Pong(vec![])).unwrap();
+                        socket.0.write(Message::Pong(vec![])).unwrap();
                     }
                     Message::Pong(_) | Message::Binary(_) | Message::Frame(_) => (),
                     Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
